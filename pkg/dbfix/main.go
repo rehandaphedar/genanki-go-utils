@@ -91,7 +91,7 @@ func FixDb(inputPath, outputPath string) error {
 				transaction, _ := db.Begin()
 				statement, _ := transaction.Prepare("UPDATE cards SET id=? WHERE id=?")
 				for _, id := range cardIDs {
-					statement.Exec(GenerateIntID(), id)
+					statement.Exec(GenerateIntId(), id)
 				}
 				statement.Close()
 				transaction.Commit()
@@ -116,7 +116,7 @@ func FixDb(inputPath, outputPath string) error {
 	return nil
 }
 
-func GenerateIntID() int64 {
+func GenerateIntId() int64 {
 	var b [8]byte
 	rand.Read(b[:])
 	return int64(binary.LittleEndian.Uint64(b[:]) & math.MaxInt64)
