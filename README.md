@@ -11,31 +11,28 @@ go get git.sr.ht/~rehandaphedar/genanki-go-utils/pkg/qul
 
 The package helps interact with the [Quranic Universal Library (QUL)](https://qul.tarteel.ai/resources/quran-metadata).
 
-# Fix DB
+# DB Fix
 
 Installation:
 ```sh
-go get git.sr.ht/~rehandaphedar/genanki-go-utils/pkg/fix-db
+go get git.sr.ht/~rehandaphedar/genanki-go-utils/pkg/dbfix
 ```
 
 The package serves as a workaround until the following PRs are merged:
 1. [Fix notes.tags serialization to Anki-compatible tag format (space-delimited) by shepilov · Pull Request #5 · npcnixel/genanki-go · GitHub](https://github.com/npcnixel/genanki-go/pull/5)
 2. [make GenerateIntID always return a positive int64 by rehandaphedar · Pull Request #6 · npcnixel/genanki-go · GitHub](https://github.com/npcnixel/genanki-go/pull/6)
 
-To use it, import it and run:
+To use it run:
 ```golang
-import fix_db "git.sr.ht/~rehandaphedar/genanki-go-utils/pkg/fix-db"
 ...
-FixDb(inputPath, outputPath)
+dbfix.FixDb(inputPath, outputPath)
 ```
 
 Note:
 The fix for 2. only regenerates the `id` of the `cards` table. As for the `id` and `guid` of the `notes` table, you should manually change the ID of the note after creation like so:
 ```golang
-import fix_db "git.sr.ht/~rehandaphedar/genanki-go-utils/pkg/fix-db"
-...
 note := genanki.NewNote(...)
-note.ID = fix_db.GenerateIntID()
+note.ID = dbfix.GenerateIntID()
 deck.AddNote(note)
 ```
 

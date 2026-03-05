@@ -1,4 +1,4 @@
-package main
+package dbfix
 
 import (
 	"archive/zip"
