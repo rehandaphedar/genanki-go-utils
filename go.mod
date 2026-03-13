@@ -1,4 +1,4 @@
-module git.sr.ht/~rehandaphedar/genanki-go-utils
+module git.sr.ht/~rehandaphedar/genanki-go-utils/v2
 
 go 1.25.0
 

@@ -54,18 +54,6 @@ func PadVerseKey(verseKey string) (string, error) {
 	return fmt.Sprintf("%03d:%03d", chapter, verse), nil
 }
 
-func DeduplicateInts(ints []int) []int {
-	seen := make(map[int]bool)
-	var deduplicated []int
-	for _, value := range ints {
-		if !seen[value] {
-			seen[value] = true
-			deduplicated = append(deduplicated, value)
-		}
-	}
-	return deduplicated
-}
-
 func GetPreviousVerseKey(metadataAyahByVerseKey map[string]MetadataAyah, verseKey string) (string, bool) {
 	chapter, verse, err := DecodeVerseKey(verseKey)
 	if err != nil {

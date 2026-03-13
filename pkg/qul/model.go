@@ -76,11 +76,11 @@ type MetadataRuku struct {
 type Index struct {
 	Word   WordIndex
 	Page   map[string]int
-	Juz    map[string][]int
-	Hizb   map[string][]int
-	Rub    map[string][]int
-	Manzil map[string][]int
-	Ruku   map[string][]int
+	Juz    map[string]int
+	Hizb   map[string]int
+	Rub    map[string]int
+	Manzil map[string]int
+	Ruku   map[string]int
 	Tag    TagIndex
 }
 

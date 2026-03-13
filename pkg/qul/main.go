@@ -27,11 +27,11 @@ func BuildIndex(
 	index := Index{
 		Word:   wordIndex,
 		Page:   pageIndex,
-		Juz:    make(map[string][]int),
-		Hizb:   make(map[string][]int),
-		Rub:    make(map[string][]int),
-		Manzil: make(map[string][]int),
-		Ruku:   make(map[string][]int),
+		Juz:    make(map[string]int),
+		Hizb:   make(map[string]int),
+		Rub:    make(map[string]int),
+		Manzil: make(map[string]int),
+		Ruku:   make(map[string]int),
 		Tag: TagIndex{
 			Verse: make(map[string][]string),
 			Page:  make(map[int][]string),
@@ -206,7 +206,7 @@ func buildWordPageMap(db *sql.DB) (map[int]int, error) {
 	return wordPageMap, rows.Err()
 }
 
-func addVerseEntries(m map[string][]int, num int, verseMapping map[string]string) {
+func addVerseEntries(m map[string]int, num int, verseMapping map[string]string) {
 	for chapterStr, rangeStr := range verseMapping {
 		chapter, err := strconv.Atoi(chapterStr)
 		if err != nil {
@@ -220,7 +220,7 @@ func addVerseEntries(m map[string][]int, num int, verseMapping map[string]string
 		}
 		for verse := from; verse <= to; verse++ {
 			key := EncodeVerseKey(chapter, verse)
-			m[key] = append(m[key], num)
+			m[key] = num
 		}
 	}
 }
@@ -248,23 +248,23 @@ func buildTagsForVerse(index Index,
 		tagSet[fmt.Sprintf(*tagFormat.Page, page)] = true
 	}
 
-	for _, juz := range DeduplicateInts(index.Juz[verseKey]) {
+	if juz, ok := index.Page[verseKey]; ok {
 		tagSet[fmt.Sprintf(*tagFormat.Juz, juz)] = true
 	}
 
-	for _, hizb := range DeduplicateInts(index.Hizb[verseKey]) {
+	if hizb, ok := index.Hizb[verseKey]; ok {
 		tagSet[fmt.Sprintf(*tagFormat.Hizb, hizb)] = true
 	}
 
-	for _, rub := range DeduplicateInts(index.Rub[verseKey]) {
+	if rub, ok := index.Rub[verseKey]; ok {
 		tagSet[fmt.Sprintf(*tagFormat.Rub, rub)] = true
 	}
 
-	for _, manzil := range DeduplicateInts(index.Manzil[verseKey]) {
+	if manzil, ok := index.Manzil[verseKey]; ok {
 		tagSet[fmt.Sprintf(*tagFormat.Manzil, manzil)] = true
 	}
 
-	for _, ruku := range DeduplicateInts(index.Ruku[verseKey]) {
+	if ruku, ok := index.Ruku[verseKey]; ok {
 		tagSet[fmt.Sprintf(*tagFormat.Ruku, ruku)] = true
 	}
 
