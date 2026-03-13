@@ -1,8 +1,12 @@
 package qul
 
 import (
+	"crypto/rand"
+	"crypto/sha1"
+	"encoding/binary"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -111,4 +115,15 @@ func GetNextVerseKey(metadataAyahByVerseKey map[string]MetadataAyah, verseKey st
 		}
 	}
 	return "", false
+}
+
+func GenerateID(s ...string) int64 {
+	var b [8]byte
+	if len(s) == 0 {
+		rand.Read(b[:])
+	} else {
+		h := sha1.Sum([]byte(s[0]))
+		copy(b[:], h[:8])
+	}
+	return int64(binary.BigEndian.Uint64(b[:])) & math.MaxInt64
 }
