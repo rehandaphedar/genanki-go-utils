@@ -38,8 +38,9 @@ func BuildIndex(
 		Manzil: make(map[string]int),
 		Ruku:   make(map[string]int),
 		Tag: TagIndex{
-			Verse: make(map[string][]string),
-			Page:  make(map[int][]string),
+			Verse:  make(map[string][]string),
+			Page:   make(map[int][]string),
+			Phrase: make(map[int][]string),
 		},
 	}
 
