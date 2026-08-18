@@ -23,7 +23,10 @@ func BuildIndex(
 	if err != nil {
 		return Index{}, fmt.Errorf("build page index: %w", err)
 	}
-	phraseIndex := buildPhraseIndex(pageIndex, phrases)
+	phraseIndex, err := buildPhraseIndex(pageIndex, phrases)
+	if err != nil {
+		return Index{}, fmt.Errorf("build phrase index: %w", err)
+	}
 
 	index := Index{
 		Word:   wordIndex,
@@ -299,8 +302,8 @@ func buildTagsForPhrase(index Index, phrase Phrase) []string {
 func buildPhraseIndex(
 	pageIndex map[string]int,
 	phrases map[string]Phrase,
-) (phraseIndex map[int][]Instance) {
-	phraseIndex = make(map[int][]Instance)
+) (map[int][]Instance, error) {
+	phraseIndex := make(map[int][]Instance)
 
 	for _, phrase := range phrases {
 		for verseKey, ranges := range phrase.Ayah {
@@ -310,14 +313,19 @@ func buildPhraseIndex(
 				continue
 			}
 
+			chapter, verse, err := DecodeVerseKey(verseKey)
+			if err != nil {
+				return map[int][]Instance{}, fmt.Errorf("invalid verse key %s: %w", verseKey, err)
+			}
+
 			for instanceInVerseIndex, instanceInVerse := range ranges {
 				phraseIndex[page] = append(
 					phraseIndex[page],
-					GenerateInstance(verseKey, instanceInVerseIndex, instanceInVerse),
+					GenerateInstance(chapter, verse, instanceInVerseIndex, instanceInVerse),
 				)
 			}
 		}
 	}
 
-	return phraseIndex
+	return phraseIndex, nil
 }

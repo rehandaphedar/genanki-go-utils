@@ -1,30 +1,37 @@
 package qul
 
 import (
-	"log"
+	"fmt"
 	"sort"
 )
 
-func GenerateInstances(phrase Phrase) (instances []Instance) {
+func GenerateInstances(phrase Phrase) ([]Instance, error) {
+	instances := []Instance{}
 	for verseKey, ranges := range phrase.Ayah {
+		chapter, verse, err := DecodeVerseKey(verseKey)
+		if err != nil {
+			return []Instance{}, fmt.Errorf("invalid verse key %s: %w", verseKey, err)
+		}
+
 		for instanceInVerseIndex, instanceInVerse := range ranges {
-			instances = append(instances, GenerateInstance(verseKey, instanceInVerseIndex, instanceInVerse))
+			instances = append(instances, GenerateInstance(chapter, verse, instanceInVerseIndex, instanceInVerse))
 		}
 	}
 	sort.Slice(instances, func(i, j int) bool {
 		return compareInstances(instances[i], instances[j])
 	})
 
-	return
+	return instances, nil
 }
 
-func GenerateInstance(verseKey string, instanceInVerseIndex int, instanceInVerse [2]int) (instance Instance) {
+func GenerateInstance(chapter, verse, instanceInVerseIndex int, instanceInVerse [2]int) (instance Instance) {
 	from := instanceInVerse[0]
 	to := instanceInVerse[1]
 	instanceInVerseNumber := instanceInVerseIndex + 1
 
 	instance = Instance{
-		VerseKey:        verseKey,
+		Chapter:         chapter,
+		Verse:           verse,
 		InstanceInVerse: instanceInVerseNumber,
 		From:            from,
 		To:              to,
@@ -33,25 +40,11 @@ func GenerateInstance(verseKey string, instanceInVerseIndex int, instanceInVerse
 }
 
 func compareInstances(a, b Instance) bool {
-	compareInstancesErrorMessage := "error while compare instances %+v and %+v: decode verse key %s: %v"
-
-	chapterA, verseA, err := DecodeVerseKey(a.VerseKey)
-	if err != nil {
-		log.Println(compareInstancesErrorMessage, a, b, a.VerseKey, err)
-		return false
+	if a.Chapter != b.Chapter {
+		return a.Chapter < b.Chapter
 	}
-
-	chapterB, verseB, err := DecodeVerseKey(b.VerseKey)
-	if err != nil {
-		log.Println(compareInstancesErrorMessage, a, b, b.VerseKey, err)
-		return false
-	}
-
-	if chapterA != chapterB {
-		return chapterA < chapterB
-	}
-	if verseA != verseB {
-		return verseA < verseB
+	if a.Verse != b.Verse {
+		return a.Verse < b.Verse
 	}
 	return a.InstanceInVerse < b.InstanceInVerse
 }

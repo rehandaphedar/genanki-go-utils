@@ -117,11 +117,13 @@ type TagFormat struct {
 }
 
 type Instance struct {
-	VerseKey        string
+	Chapter         int
+	Verse           int
 	InstanceInVerse int
 	From            int
 	To              int
 	Phrase          []string
 	Context         []string
 	Continuation    []string
+	Image           string
 }
