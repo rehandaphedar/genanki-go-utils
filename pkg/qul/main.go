@@ -11,7 +11,7 @@ import (
 )
 
 func BuildIndex(
-	layoutPath string, words map[string]Word,
+	words map[string]Word, layoutPath string, phrases map[string]Phrase,
 	metadataDivision MetadataDivision,
 	tagFormat TagFormat,
 ) (Index, error) {
@@ -23,10 +23,12 @@ func BuildIndex(
 	if err != nil {
 		return Index{}, fmt.Errorf("build page index: %w", err)
 	}
+	phraseIndex := buildPhraseIndex(pageIndex, phrases)
 
 	index := Index{
 		Word:   wordIndex,
 		Page:   pageIndex,
+		Phrase: phraseIndex,
 		Juz:    make(map[string]int),
 		Hizb:   make(map[string]int),
 		Rub:    make(map[string]int),
@@ -57,7 +59,7 @@ func BuildIndex(
 	pageTagSets := make(map[int]map[string]bool)
 	for verseKey, page := range index.Page {
 
-		tags, err := buildTagsForVerse(index, tagFormat, verseKey)
+		tags, err := buildTagsForVerse(index, tagFormat, verseKey, phrases)
 		if err != nil {
 			return Index{}, fmt.Errorf("build tags for verse %s: %w", verseKey, err)
 		}
@@ -79,25 +81,15 @@ func BuildIndex(
 		index.Tag.Page[page] = tags
 	}
 
-	return index, nil
-}
-
-func BuildTagsForPhrase(index Index, phrase Phrase) []string {
-	tagSet := make(map[string]bool)
-
-	for verseKey := range phrase.Ayah {
-		if tags, ok := index.Tag.Verse[verseKey]; ok {
-			for _, tag := range tags {
-				tagSet[tag] = true
-			}
+	for phraseIdStr, phrase := range phrases {
+		phraseId, err := strconv.Atoi(phraseIdStr)
+		if err != nil {
+			return Index{}, fmt.Errorf("parse phrase id %s: %w", phraseIdStr, err)
 		}
+		index.Tag.Phrase[phraseId] = buildTagsForPhrase(index, phrase)
 	}
 
-	tags := make([]string, 0, len(tagSet))
-	for t := range tagSet {
-		tags = append(tags, t)
-	}
-	return tags
+	return index, nil
 }
 
 func buildWordIndex(words map[string]Word) (WordIndex, error) {
@@ -227,7 +219,8 @@ func addVerseEntries(m map[string]int, num int, verseMapping map[string]string) 
 
 func buildTagsForVerse(index Index,
 	tagFormat TagFormat,
-	verseKey string) ([]string, error) {
+	verseKey string,
+	phrases map[string]Phrase) ([]string, error) {
 
 	chapter, _, err := DecodeVerseKey(verseKey)
 	if err != nil {
@@ -242,6 +235,16 @@ func buildTagsForVerse(index Index,
 	tagSet := map[string]bool{
 		fmt.Sprintf(*tagFormat.Chapter, chapter):      true,
 		fmt.Sprintf(*tagFormat.Verse, paddedVerseKey): true,
+	}
+
+	for phraseIdStr, phrase := range phrases {
+		phraseId, err := strconv.Atoi(phraseIdStr)
+		if err != nil {
+			return []string{}, fmt.Errorf("parse phrase id %s: %w", phraseIdStr, err)
+		}
+		if _, ok := phrase.Ayah[verseKey]; ok {
+			tagSet[fmt.Sprintf(*tagFormat.Phrase, phraseId)] = true
+		}
 	}
 
 	if page, ok := index.Page[verseKey]; ok {
@@ -273,4 +276,48 @@ func buildTagsForVerse(index Index,
 		tags = append(tags, t)
 	}
 	return tags, nil
+}
+
+func buildTagsForPhrase(index Index, phrase Phrase) []string {
+	tagSet := make(map[string]bool)
+
+	for verseKey := range phrase.Ayah {
+		if tags, ok := index.Tag.Verse[verseKey]; ok {
+			for _, tag := range tags {
+				tagSet[tag] = true
+			}
+		}
+	}
+
+	tags := make([]string, 0, len(tagSet))
+	for t := range tagSet {
+		tags = append(tags, t)
+	}
+	return tags
+}
+
+func buildPhraseIndex(
+	pageIndex map[string]int,
+	phrases map[string]Phrase,
+) (phraseIndex map[int][]Instance) {
+	phraseIndex = make(map[int][]Instance)
+
+	for _, phrase := range phrases {
+		for verseKey, ranges := range phrase.Ayah {
+			page, ok := pageIndex[verseKey]
+			// TODO: error handling
+			if !ok {
+				continue
+			}
+
+			for instanceInVerseIndex, instanceInVerse := range ranges {
+				phraseIndex[page] = append(
+					phraseIndex[page],
+					GenerateInstance(verseKey, instanceInVerseIndex, instanceInVerse),
+				)
+			}
+		}
+	}
+
+	return phraseIndex
 }
