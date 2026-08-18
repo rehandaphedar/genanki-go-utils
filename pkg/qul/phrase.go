@@ -30,8 +30,10 @@ func GenerateInstance(chapter, verse, instanceInVerseIndex int, instanceInVerse 
 	instanceInVerseNumber := instanceInVerseIndex + 1
 
 	instance = Instance{
-		Chapter:         chapter,
-		Verse:           verse,
+		VersePosition: VersePosition{
+			Chapter: chapter,
+			Verse:   verse,
+		},
 		InstanceInVerse: instanceInVerseNumber,
 		From:            from,
 		To:              to,

@@ -23,20 +23,22 @@ func BuildIndex(
 	if err != nil {
 		return Index{}, fmt.Errorf("build page index: %w", err)
 	}
+	versePageIndex, err := buildVersePageIndex(pageIndex)
 	phraseIndex, err := buildPhraseIndex(pageIndex, phrases)
 	if err != nil {
 		return Index{}, fmt.Errorf("build phrase index: %w", err)
 	}
 
 	index := Index{
-		Word:   wordIndex,
-		Page:   pageIndex,
-		Phrase: phraseIndex,
-		Juz:    make(map[string]int),
-		Hizb:   make(map[string]int),
-		Rub:    make(map[string]int),
-		Manzil: make(map[string]int),
-		Ruku:   make(map[string]int),
+		Word:      wordIndex,
+		Page:      pageIndex,
+		PageVerse: versePageIndex,
+		Phrase:    phraseIndex,
+		Juz:       make(map[string]int),
+		Hizb:      make(map[string]int),
+		Rub:       make(map[string]int),
+		Manzil:    make(map[string]int),
+		Ruku:      make(map[string]int),
 		Tag: TagIndex{
 			Verse:  make(map[string][]string),
 			Page:   make(map[int][]string),
@@ -178,6 +180,28 @@ func buildPageIndex(dbPath string, words map[string]Word) (map[string]int, error
 		}
 	}
 	return pageIndex, nil
+}
+func buildVersePageIndex(pageIndex map[string]int) (map[int]VersePosition, error) {
+	versePageIndex := make(map[int]VersePosition)
+
+	for verseKey, page := range pageIndex {
+		chapter, verse, err := DecodeVerseKey(verseKey)
+		if err != nil {
+			return map[int]VersePosition{}, fmt.Errorf("invalid verse key %s: %w", verseKey, err)
+		}
+
+		current, exists := versePageIndex[page]
+		if !exists ||
+			chapter < current.Chapter ||
+			(chapter == current.Chapter && verse < current.Verse) {
+			versePageIndex[page] = VersePosition{
+				Chapter: chapter,
+				Verse:   verse,
+			}
+		}
+	}
+
+	return versePageIndex, nil
 }
 
 func buildWordPageMap(db *sql.DB) (map[int]int, error) {

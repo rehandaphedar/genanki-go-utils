@@ -74,15 +74,16 @@ type MetadataRuku struct {
 }
 
 type Index struct {
-	Word   WordIndex
-	Page   map[string]int
-	Phrase map[int][]Instance
-	Juz    map[string]int
-	Hizb   map[string]int
-	Rub    map[string]int
-	Manzil map[string]int
-	Ruku   map[string]int
-	Tag    TagIndex
+	Word      WordIndex
+	Page      map[string]int
+	PageVerse map[int]VersePosition
+	Phrase    map[int][]Instance
+	Juz       map[string]int
+	Hizb      map[string]int
+	Rub       map[string]int
+	Manzil    map[string]int
+	Ruku      map[string]int
+	Tag       TagIndex
 }
 
 type WordIndex struct {
@@ -117,8 +118,7 @@ type TagFormat struct {
 }
 
 type Instance struct {
-	Chapter         int
-	Verse           int
+	VersePosition
 	InstanceInVerse int
 	From            int
 	To              int
@@ -126,4 +126,9 @@ type Instance struct {
 	Context         []string
 	Continuation    []string
 	Image           string
+}
+
+type VersePosition struct {
+	Chapter int
+	Verse   int
 }
