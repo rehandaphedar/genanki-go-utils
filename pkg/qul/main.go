@@ -248,7 +248,7 @@ func buildTagsForVerse(index Index,
 		tagSet[fmt.Sprintf(*tagFormat.Page, page)] = true
 	}
 
-	if juz, ok := index.Page[verseKey]; ok {
+	if juz, ok := index.Juz[verseKey]; ok {
 		tagSet[fmt.Sprintf(*tagFormat.Juz, juz)] = true
 	}
 
