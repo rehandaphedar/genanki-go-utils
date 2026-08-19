@@ -23,7 +23,7 @@ func BuildIndex(
 	if err != nil {
 		return Index{}, fmt.Errorf("build page index: %w", err)
 	}
-	versePageIndex, err := buildVersePageIndex(pageIndex)
+	pageVerseIndex, err := buildPageVerseIndex(pageIndex)
 	phraseIndex, err := buildPhraseIndex(pageIndex, phrases)
 	if err != nil {
 		return Index{}, fmt.Errorf("build phrase index: %w", err)
@@ -32,7 +32,7 @@ func BuildIndex(
 	index := Index{
 		Word:      wordIndex,
 		Page:      pageIndex,
-		PageVerse: versePageIndex,
+		PageVerse: pageVerseIndex,
 		Phrase:    phraseIndex,
 		Juz:       make(map[string]int),
 		Hizb:      make(map[string]int),
@@ -181,7 +181,7 @@ func buildPageIndex(dbPath string, words map[string]Word) (map[string]int, error
 	}
 	return pageIndex, nil
 }
-func buildVersePageIndex(pageIndex map[string]int) (map[int]VersePosition, error) {
+func buildPageVerseIndex(pageIndex map[string]int) (map[int]VersePosition, error) {
 	versePageIndex := make(map[int]VersePosition)
 
 	for verseKey, page := range pageIndex {
