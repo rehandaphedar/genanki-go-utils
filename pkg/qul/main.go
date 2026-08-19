@@ -352,5 +352,14 @@ func buildPhraseIndex(
 		}
 	}
 
+	for page := range phraseIndex {
+		sort.Slice(
+			phraseIndex[page],
+			func(i, j int) bool {
+				return compareInstances(phraseIndex[page][i], phraseIndex[page][j])
+			},
+		)
+	}
+
 	return phraseIndex, nil
 }
