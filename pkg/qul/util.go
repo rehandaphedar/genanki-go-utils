@@ -105,13 +105,17 @@ func GetNextVerseKey(metadataAyahByVerseKey map[string]MetadataAyah, verseKey st
 	return "", false
 }
 
-func GenerateID(s ...string) int64 {
+func GenerateID(parts ...string) (int64, error) {
 	var b [8]byte
-	if len(s) == 0 {
-		rand.Read(b[:])
+
+	if len(parts) == 0 {
+		if _, err := rand.Read(b[:]); err != nil {
+			return 0, err
+		}
 	} else {
-		h := sha1.Sum([]byte(s[0]))
+		h := sha1.Sum([]byte(strings.Join(parts, "\x00")))
 		copy(b[:], h[:8])
 	}
-	return int64(binary.BigEndian.Uint64(b[:])) & math.MaxInt64
+
+	return int64(binary.BigEndian.Uint64(b[:])) & math.MaxInt64, nil
 }
